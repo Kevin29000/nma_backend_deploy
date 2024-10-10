@@ -9,4 +9,9 @@ import org.springframework.stereotype.Repository;
 public interface FoodRepository extends JpaRepository<Food, Integer> {
     List<Food> findByNameContaining(String name);
     List<Food> findByNameContainingIgnoreCase(String name);
+
+    List<Food> findByUserId(int userId);
+    List<Food> findByUserIdAndNameContainingIgnoreCase(int userId, String name);
+
+    List<Food> findByIsDefaultTrue();
 }

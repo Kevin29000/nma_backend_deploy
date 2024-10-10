@@ -1,24 +1,14 @@
 package com.nutrition_monitoring_app.Food;
 
-import com.nutrition_monitoring_app.User.User;
-
 import jakarta.persistence.*;
 
 @Entity
-@Table (name = "foods")
-public class Food {
+@Table (name = "default_foods")
+public class DefaultFood {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "default_food_id")
-    private DefaultFood defaultFood;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -35,27 +25,8 @@ public class Food {
     @Column(name = "lipids", nullable = false)
     private float lipids;
 
-    @Column(name="is_default", nullable = false)
-    private boolean isDefault;
-
     public int getId() {
         return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public DefaultFood getDefaultFood() {
-        return defaultFood;
-    }
-
-    public void setDefaultFood(DefaultFood defaultFood) {
-        this.defaultFood = defaultFood;
     }
 
     public String getName() {
@@ -96,13 +67,5 @@ public class Food {
 
     public void setLipids(float lipids) {
         this.lipids = lipids;
-    }
-
-    public boolean isDefault() {
-        return isDefault;
-    }
-
-    public void setIsDefault(boolean isDefault) {
-        this.isDefault = isDefault;
     }
 }

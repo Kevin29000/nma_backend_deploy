@@ -1,14 +1,26 @@
 package com.nutrition_monitoring_app.User;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nutrition_monitoring_app.Food.DefaultFood;
+import com.nutrition_monitoring_app.Food.DefaultFoodRepository;
+import com.nutrition_monitoring_app.Food.Food;
+import com.nutrition_monitoring_app.Food.FoodRepository;
+
 @Service
 public class UserService {// Création des méthodes CRUD
     @Autowired // Dit à spring d'injecter le service dans cette variable
     private UserRepository userRepository;
+
+    @Autowired
+    private DefaultFoodRepository defaultFoodRepository;
+
+    @Autowired
+    private FoodRepository foodRepository;
 
     // Authentification
     public Optional<User> login(String email, String password) {
@@ -29,7 +41,26 @@ public class UserService {// Création des méthodes CRUD
         newUser.setEmail(email);
         newUser.setPassword(password);
 
-        return userRepository.save(newUser);
+        User createdUser = userRepository.save(newUser);
+
+        List<DefaultFood> defaultFoods = defaultFoodRepository.findAll();
+
+        for (DefaultFood defaultFood : defaultFoods) {
+            Food food = new Food();
+            food.setUser(createdUser);
+            food.setDefaultFood(defaultFood);
+            food.setName(defaultFood.getName());
+            food.setCalories(defaultFood.getCalories());
+            food.setProteins(defaultFood.getProteins());
+            food.setCarbohydrates(defaultFood.getCarbohydrates());
+            food.setLipids(defaultFood.getLipids());
+            food.setIsDefault(true);
+
+            // Sauvegarder l'aliment dans la base de données
+            Food savedFood = foodRepository.save(food);
+        }
+
+        return createdUser;
     }
 
     public Optional<User> getUserProfile(int id) {
