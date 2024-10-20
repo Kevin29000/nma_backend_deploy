@@ -11,6 +11,9 @@ import com.nutrition_monitoring_app.Food.DefaultFoodRepository;
 import com.nutrition_monitoring_app.Food.Food;
 import com.nutrition_monitoring_app.Food.FoodRepository;
 
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
+
 @Service
 public class UserService {// Création des méthodes CRUD
     @Autowired // Dit à spring d'injecter le service dans cette variable
@@ -22,10 +25,13 @@ public class UserService {// Création des méthodes CRUD
     @Autowired
     private FoodRepository foodRepository;
 
+    private final Argon2 argon2 = Argon2Factory.create();
+
     // Authentification
     public Optional<User> login(String email, String password) {
         Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
+        //if (user.isPresent() && user.get().getPassword().equals(password)) { // v1 avant hachage
+        if (user.isPresent() && argon2.verify(user.get().getPassword(), password.toCharArray())) {
             return user; // Authentification réussie
         }
         return Optional.empty(); // Echec de l'authentification
@@ -39,7 +45,10 @@ public class UserService {// Création des méthodes CRUD
 
         User newUser = new User();
         newUser.setEmail(email);
-        newUser.setPassword(password);
+        //newUser.setPassword(password); // v1 avant hachage
+        char[] passwordChars = password.toCharArray();
+        String hashedPassword = argon2.hash(10, 65536, 1, passwordChars);
+        newUser.setPassword(hashedPassword);
 
         User createdUser = userRepository.save(newUser);
 
@@ -73,7 +82,10 @@ public class UserService {// Création des méthodes CRUD
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setEmail(email);
-            user.setPassword(newPassword);
+            //user.setPassword(newPassword); // v1 avant hachage
+            char[] newPasswordChars = newPassword.toCharArray();
+            String hashedPassword = argon2.hash(10, 65536, 1, newPasswordChars);
+            user.setPassword(hashedPassword);
 
             return userRepository.save(user);
         } else {
@@ -82,7 +94,8 @@ public class UserService {// Création des méthodes CRUD
     }
 
     public boolean verifyPassword(User user, String currentPassword) {
-        return user.getPassword().equals(currentPassword);
+        //return user.getPassword().equals(currentPassword); // v1 avant hachage
+        return argon2.verify(user.getPassword(), currentPassword.toCharArray());
     }
 
     public User updateUserProfile(User user) {
